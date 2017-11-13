@@ -1,0 +1,31 @@
+city,pop,continent,growthrate,sexratio
+Chongqing,13330000,Asia,2.67,840
+Delhi,25700000,Asia,2.65,866
+Beijing,20380000,Asia,3.43,892
+Kolkata,14860000,Asia,1.13,898
+Bangalore,10090000,Asia,3.2,908
+Shanghai,23740000,Asia,2.67,917
+Mumbai,21040000,Asia,1.64,922
+Shenzhen,10750000,Asia,0.98,926
+Osaka,20240000,Asia,0.28,931
+Mexico City,21000000,North America,0.81,940
+New York,18590000,North America,0.21,940
+Buenos Aires,15180000,South America,0.92,948
+Dhaka,17600000,Asia,3.52,950
+Karachi,16620000,Asia,2.92,952
+Istanbul,14160000,Asia,1.28,952
+Cairo,18770000,Asia,1.83,961
+Tianjin,11210000,Asia,2.68,961
+Guangzhou,12460000,Asia,3.94,962
+Lagos,13120000,Africa,4.17,970
+Jakarta,10320000,Asia,1.81,972
+Tokyo,38000000,Asia,0.17,975
+Manila,12950000,Asia,1.48,1000
+Lima,9900000,South America,1.66,1001
+Kinshasa,11590000,Africa,3.95,1005
+Los Angeles,12310000,North America,0.23,1020
+Rio de Janeiro,12900000,South America,0.65,1030
+Paris,10840000,Europe,0.77,1041
+London,10310000,Europe,1.01,1052
+Sao Paulo,21070000,South America,0.98,1085
+Moscow,12170000,Europe,0.5,1162
