@@ -2,6 +2,7 @@ library(rgdal)
 library(leaflet)
 library(htmlwidgets)
 library(webshot)
+library(ggplot2)
 
 blr <- readOGR("data", "BBMP-Wards")
 blr_wards <- read.csv("data/blr_wards.csv", sep=",", dec=".")
@@ -87,5 +88,6 @@ choropleth2021 <- leaflet() %>%
 saveWidget(choropleth2021, 'choropleth2021.html', selfcontained = FALSE)
 webshot('choropleth2021.html', file="images/Blr2021.png", cliprect = 'viewport')
 
-system("convert images/blr*.png -delay 3 -loop 0 images/blr_population.gif")
+system("convert -delay 100 images/Blr*.png -loop 0 images/blr_population.gif")
 system("rm -rf choropleth20*")
+
