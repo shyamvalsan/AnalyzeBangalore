@@ -11,83 +11,51 @@ blr_wards <- read.csv("data/blr_wards.csv", sep=",", dec=".")
 blr_wards[,18] <- as.numeric(gsub(",", "", blr_wards[,18]))
 blr_wards[,19] <- as.numeric(gsub("%", "", blr_wards[,19]))
 
-# Add column with 2001 population value
-blr_wards[,20] <- as.integer((100*blr_wards$Population2011)/(blr_wards$DecadalPopnGrowthRate + 100))
-names(blr_wards)[20] <- "Population2001"
+# Use splinefun to interpolate and extrapolate the population of each ward from 2001 to 2021 
+# As reference we use the population from 2011 and the decadal growth rate of each ward from 2001-2011
+# Comparing the results of this formula to the United Nations estimates show that they align very closely
+for (ward in 1:length(blr_wards[,3])) {
+  range <- c(2001:2011)
+  for (j in 1:21) {
+    population <- seq(as.integer((100*blr_wards[ward,3])/(blr_wards[ward,19] + 100)),blr_wards[ward,3], length.out=11)
+    func = splinefun(x=range, y=population, method="fmm",  ties = mean)
+    blr_wards[ward,(j+19)] <- as.integer(func(seq(2000+j,2000+j,1)))
+    names(blr_wards)[j+19] <- paste0("pop",2000+j,"")
+  }  
+}
 
-# Add column with 2021 population value
-blr_wards[,21] <- as.integer(((blr_wards$DecadalPopnGrowthRate*blr_wards$Population2011)/100)+blr_wards$Population2011)
-names(blr_wards)[21] <- "Population2021"
+colorrange <- c(15000,30000,50000,80000,125000,163000)
+palettePopulation <- colorNumeric("Reds",domain = colorrange)
 
-# 2001 choropleth
+for (year in 2001:2021) {
+  colname <- paste0("pop",year,"")
+  labelname <- paste("Bangalore population",year)
+  popupPopulation <- paste0(blr_wards$WardName,":",blr_wards[,colname])
+  name <- paste("pop", year, sep="")
+  html_name <- paste(name, ".html", sep="")
+  png_name <- paste(name, ".png", sep="")
+  png_absolute_name <- paste("images/", png_name, sep="")
+  
+  img <- leaflet() %>% 
+    addProviderTiles("Esri.WorldGrayCanvas", 
+                     options = tileOptions(minZoom = 10, maxZoom = 16)) %>%
+    addPolygons(data = blr, fillColor = ~palettePopulation(blr_wards[,colname]),
+                fillOpacity = 0.6, color = "darkgrey", weight = 1.5, 
+                popup = popupPopulation, group = "Population") %>%
+    addLegend(position = 'topright', 
+              pal = palettePopulation,
+              values = colorrange,
+              opacity = 0.6,    
+              title = "Population") %>%
+    addLabelOnlyMarkers(
+      lng = 77.47, lat = 13.18,
+      label = labelname,
+      labelOptions = labelOptions(noHide = T,textsize = "20px"))
+  
+  saveWidget(img, html_name, selfcontained = FALSE)
+  webshot(html_name, file=png_absolute_name, cliprect = 'viewport')
+}
 
-palettePopulation <- colorNumeric("OrRd",domain = c(0,10000,15000,20000,25000,30000,50000,60000,70000,80000,90000,100000))
-popupPopulation <- paste0(blr_wards$WardName,":",blr_wards$Population2001)
-
-choropleth2001 <- leaflet() %>%
-  addProviderTiles("Esri.WorldGrayCanvas", options = tileOptions(minZoom = 10, maxZoom = 16)) %>%
-  addPolygons(data = blr, fillColor = ~palettePopulation(blr_wards$Population2001),
-              fillOpacity = 0.6, color = "darkgrey", weight = 1.5, 
-              popup = popupPopulation, group = "Population") %>%
-  addLegend(position = 'topright', 
-            pal = palettePopulation,
-            values = blr_wards$Population2001,
-            opacity = 0.6,    
-            title = "Population") %>%
-  addLabelOnlyMarkers(
-    lng = 77.45, lat = 13.18,
-    label = "Bangalore Population 2001",
-    labelOptions = labelOptions(noHide = T,textsize = "20px"))
-
-saveWidget(choropleth2001, 'choropleth2001.html', selfcontained = FALSE)
-webshot('choropleth2001.html', file="images/Blr2001.png", cliprect = 'viewport')
-
-# 2011 choropleth 
-
-palettePopulation <- colorNumeric("OrRd",domain = blr_wards$Population2011)
-popupPopulation <- paste0(blr_wards$WardName,":",blr_wards$Population2011)
-
-choropleth2011 <- leaflet() %>%
-  addProviderTiles("Esri.WorldGrayCanvas", options = tileOptions(minZoom = 10, maxZoom = 16)) %>%
-  addPolygons(data = blr, fillColor = ~palettePopulation(blr_wards$Population2011),
-              fillOpacity = 0.6, color = "darkgrey", weight = 1.5,
-              popup = popupPopulation, group = "Population") %>%
-  addLegend(position = 'topright',
-            pal = palettePopulation,
-            values = blr_wards$Population2011,
-            opacity = 0.6,
-            title = "Population") %>%
-  addLabelOnlyMarkers(
-    lng = 77.45, lat = 13.18,
-    label = "Bangalore Population 2011",
-    labelOptions = labelOptions(noHide = T,textsize = "20px"))
-
-saveWidget(choropleth2011, 'choropleth2011.html', selfcontained = FALSE)
-webshot('choropleth2011.html', file="images/Blr2011.png", cliprect = 'viewport')
-
-# 2021 choropleth 
-
-palettePopulation <- colorNumeric("Reds",domain = blr_wards$Population2021)
-popupPopulation <- paste0(blr_wards$WardName,":",blr_wards$Population2021)
-
-choropleth2021 <- leaflet() %>%
-  addProviderTiles("Esri.WorldGrayCanvas", options = tileOptions(minZoom = 10, maxZoom = 16)) %>%
-  addPolygons(data = blr, fillColor = ~palettePopulation(blr_wards$Population2021),
-              fillOpacity = 0.6, color = "darkgrey", weight = 1.5,
-              popup = popupPopulation, group = "Population") %>%
-  addLegend(position = 'topright',
-            pal = palettePopulation,
-            values = blr_wards$Population2021,
-            opacity = 0.6,
-            title = "Population") %>%
-  addLabelOnlyMarkers(
-    lng = 77.45, lat = 13.18,
-    label = "Bangalore Population 2021",
-    labelOptions = labelOptions(noHide = T,textsize = "20px"))
-
-saveWidget(choropleth2021, 'choropleth2021.html', selfcontained = FALSE)
-webshot('choropleth2021.html', file="images/Blr2021.png", cliprect = 'viewport')
-
-system("convert -delay 100 images/Blr*.png -loop 0 images/blr_population.gif")
-system("rm -rf choropleth20*")
-
+system("rm -rf pop*.html")
+system("rm -rf pop*_files")
+system("convert -delay 50 images/pop*.png -loop 0 images/blr_population.gif")
