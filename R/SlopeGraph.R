@@ -2,17 +2,14 @@ library(RColorBrewer)
 library(scales)
 
 x <- read.csv("data/ward_popt.csv")
-x.locs <- c(0.01,0.99)
-y.locs<- c(0,1)
-
-dim.x<-c(0,1) #plot dims x
-dim.y<-c(0,1) #plot dims y
+x.locs <- c(0.075,0.92)
+y.locs<- c(0,1,5)
 
 x[,1]<-as.character(x[,1]) 
 listOfWards<-ncol(x)-1
 ranking<-2:ncol(x)
 rankingOriginal<-x[,ranking]
-x[,ranking]<-rescale(as.matrix(x[,ranking]),c(3,20))  ## why?
+x[,ranking]<-rescale(as.matrix(x[,ranking]),c(5,25))  #rescale so line sizes make sense
 
 #reorder column ranking 
 first.ord<-order(x[1,ranking],decreasing=T)
@@ -38,12 +35,8 @@ x.vals<-split(x.vals,x.vals)
 #y locations, rearranged in loop, exception if dates are plotted
 y.vals<-rev(seq(y.locs[1],y.locs[2],length=listOfWards+1))[-1]
 
-#get line colors
+#get line colors  ``  
 line.cols<-alpha(colorRampPalette(c("red","yellow","green"))(listOfWards),0.7)
-
-#define distance of lines from labels
-str.max<-max(strwidth(row.names(dt.dat.srt[[1]])))
-ln.st<-0.07*str.max + str.max/2
 
 for(val in 1:(length(data_col)-1)){
   
@@ -57,9 +50,13 @@ for(val in 1:(length(data_col)-1)){
   
   if(val == length(data_col)-1){
     rowtxt <- row.names(plt.tmp[[2]])
-    
     text(x.tmp[[2]],y.vals,rowtxt)
+    dt.txt<-substitute(bold(x),list(x=names(plt.tmp)[2]))
+    text(unique(x.tmp[[2]]),y.locs[2],dt.txt)
   }	
+  
+  dt.txt<-substitute(bold(x),list(x=names(plt.tmp)[1]))  
+  text(unique(x.tmp[[1]]),y.locs[2],dt.txt)
   
   srt.ln.y<-match(row.names(plt.tmp[[1]]),row.names(plt.tmp[[2]]))
   
@@ -70,16 +67,10 @@ for(val in 1:(length(data_col)-1)){
   sel.sp<-rep(T,listOfWards)
   
   #for lines
-  segments(
-    x.tmp[[1]][sel.sp]+ln.st,
-    y.vals[sel.sp],
-    x.tmp[[2]][sel.sp]-ln.st,
-    y.vals[srt.ln.y][sel.sp],
-    col=line.cols[sel.sp],
-    lwd=lwd.val[sel.sp]
-  )
+  segments(x.tmp[[1]][sel.sp], y.vals[sel.sp], x.tmp[[2]][sel.sp],
+    y.vals[srt.ln.y][sel.sp], col=line.cols[sel.sp], lwd=lwd.val[sel.sp])
   
-  #resort color vector for next colummn
+  #resort color vector for next column
   srt.cl.y<-match(row.names(plt.tmp[[2]]),row.names(plt.tmp[[1]]))
   line.cols<-line.cols[srt.cl.y]
 }
