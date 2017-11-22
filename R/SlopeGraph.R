@@ -2,8 +2,6 @@ library(RColorBrewer)
 library(scales)
 
 pop <- read.csv("data/ward_popt.csv")
-x.locs <- c(0.075,0.92)
-y.locs<- c(0,1,5)
 plot(c(0,1),c(0,1),type='n',axes=F,xlab='',ylab='') 
 
 pop[,1]<-as.character(pop[,1]) 
@@ -26,9 +24,9 @@ for(val in 1:nrow(pop)){
 }
 
 # x and y co-ordinates 
-x_plot<-rep(seq(x.locs[1],x.locs[2],length=length(columns)),each=listOfWards)
+x_plot<-rep(c(0.1,0.5,0.9),each=listOfWards)
 x_plot<-split(x_plot,x_plot)
-y_plot<-rev(seq(y.locs[1],y.locs[2],length=listOfWards+1))[-1]
+y_plot<-rev(seq(0,0.9,length=listOfWards+1))
 
 # get line colors
 line_colors<-alpha(colorRampPalette(c("red","yellow","green"))(listOfWards),0.7)
